@@ -47,9 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Welcome back!',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 const Text('Please login to access and start shopping'),
@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         decoration:
-                        const InputDecoration(hintText: 'Enter your email'),
+                            const InputDecoration(hintText: 'Enter your email'),
                         validator: _emailValidator,
                       ),
                       const SizedBox(height: 24),
