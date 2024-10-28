@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../home/homescreen.dart'; // Import HomeScreen page here
+
 import 'package:learn_buddy_project/components/my_button.dart';
 import 'package:learn_buddy_project/components/my_textfield.dart';
 import 'package:learn_buddy_project/components/square_tile.dart';
-
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -12,7 +13,13 @@ class LoginPage extends StatelessWidget {
   final passwordController = TextEditingController();
 
   // sign user in method
-  void signUserIn() {}
+  void signUserIn(BuildContext context) {
+    // Navigate to HomeScreen after sign in
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomeScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +87,7 @@ class LoginPage extends StatelessWidget {
 
               // sign in button
               MyButton(
-                onTap: signUserIn,
+                onTap: () => signUserIn(context), // Pass context to navigate
               ),
 
               const SizedBox(height: 50),

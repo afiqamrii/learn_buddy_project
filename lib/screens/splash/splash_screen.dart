@@ -50,12 +50,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           ),
           // Logo positioned at top left with custom padding and size
           Positioned(
-            top: 45, // Adjust top padding as needed
+            top: 39, // Adjust top padding as needed
             left: 0, // Adjust left padding as needed
             child: SvgPicture.asset(
-              'assets/logo/lb_logo.svg',
-              width: 110, // Adjust width for resizing
-              height: 110, // Adjust height for resizing
+              'assets/logo/lb_logo_pic.svg',
+              width: 120, // Adjust width for resizing
+              height: 120, // Adjust height for resizing
             ),
           ),
           // Content with SafeArea
@@ -80,21 +80,20 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                         children: <TextSpan>[
                           const TextSpan(
-                              text: 'Struggling to keep up ?',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            text: 'Struggling to keep up ?',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           TextSpan(
-                            text: 'Discover learning content ',
+                            text: ' Discover the learning content ',
                             style: const TextStyle(
-
                               color: Colors.white,
                             ),
                           ),
                           const TextSpan(text: 'for you, '),
                           TextSpan(
-                            text: 'right here.',
+                            text: 'right here !',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.amber, // Highlight color for "right here"
@@ -107,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   const Spacer(flex: 1),
                   // Subtitle text
                   Text(
-                    'Hedon brings the resources you need at a price you can afford.',
+                    'Overwhelmed by your studies? We’re here to empower you with the resources you need to succeed!',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withOpacity(0.8),
