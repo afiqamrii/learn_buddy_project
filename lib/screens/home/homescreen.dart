@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100], // Light background color
       body: Column(
         children: [
           Padding(
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 25,
                   backgroundImage: AssetImage('assets/avatar.jpg'), // Replace with actual image asset
                 ),
-                Icon(Icons.settings, color: Colors.grey[600], size: 30),
+                Icon(Icons.settings, color: Colors.grey[700], size: 30),
               ],
             ),
           ),
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.black87,
                       ),
                     ),
                     SizedBox(height: 8),
@@ -72,8 +72,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 15),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3), // shadow position
+                          ),
+                        ],
                       ),
                       child: TextField(
                         decoration: InputDecoration(
@@ -104,12 +112,12 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border), // Favorite icon
-            label: 'Favorite',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined), // Home icon
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border), // Favorite icon
+            label: 'Favorite',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined), // Settings icon
@@ -119,6 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blueAccent, // Highlight color for selected item
         unselectedItemColor: Colors.grey, // Color for unselected items
+        showUnselectedLabels: false, // Only show labels on selected items
+        backgroundColor: Colors.white, // Navbar background
+        elevation: 10, // Elevation for modern look
         onTap: _onItemTapped,
       ),
     );
