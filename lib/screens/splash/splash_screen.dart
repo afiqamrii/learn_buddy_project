@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../auth/login_screen.dart';
+import '../auth/login_page.dart'; // Updated import to login_page.dart
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -57,7 +57,7 @@ class SplashScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                          builder: (context) => LoginPage(), // Changed to LoginPage
                         ),
                       );
                     },
