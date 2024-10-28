@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
-import '../auth/login_screen.dart';
+import '../auth/login_page.dart'; // Updated import to login_page.dart
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -121,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                          builder: (context) => LoginPage(), // Changed to LoginPage
                         ),
                       );
                     },
