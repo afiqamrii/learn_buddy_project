@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Forgot Password?',
+                      'Forgot Password??',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ],
