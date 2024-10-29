@@ -1,26 +1,50 @@
+import 'dart:developer';
+
+import 'package:learn_buddy_project/auth/auth_service.dart'; // AuthService for Firebase login
 import 'package:flutter/material.dart';
 import 'package:learn_buddy_project/screens/home/homescreen.dart'; // Import HomeScreen page here
-
 import 'package:learn_buddy_project/components/my_button.dart';
 import 'package:learn_buddy_project/components/my_textfield.dart';
 import 'package:learn_buddy_project/components/square_tile.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+import 'auth_service.dart';
 
-  // text editing controllers
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
-  // @override
-  // void dispose(){
-  //   super.dispose();
-  //
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
 
+class _LoginPageState extends State<LoginPage> {
+  final AuthService _auth = AuthService(); // Initialize Firebase AuthService
 
-  // sign user in method
-  void signUserIn(BuildContext context) {
-    // Navigate to HomeScreen after sign in
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Firebase sign-in method
+  void _login() async {
+    final user = await _auth.loginUserWithEmailAndPassword(
+        _emailController.text, _passwordController.text);
+
+    if (user != null) {
+      log("User Logged In");
+      goToHome(context); // Navigate to HomeScreen if login successful
+    } else {
+      log("Login Failed");
+      // Handle login failure (e.g., show error message)
+    }
+  }
+
+  // Navigate to HomeScreen after sign-in
+  void goToHome(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -46,9 +70,9 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 50),
 
-              // welcome back, you've been missed!
+              // welcome back message
               Text(
-                'Welcome back you\'ve been missed!',
+                'Welcome back, you\'ve been missed!',
                 style: TextStyle(
                   color: Colors.grey[700],
                   fontSize: 16,
@@ -57,25 +81,25 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // username textfield
+              // Email textfield
               MyTextField(
-                controller: usernameController,
-                hintText: 'Username',
+                controller: _emailController,
+                hintText: 'Email',
                 obscureText: false,
               ),
 
               const SizedBox(height: 10),
 
-              // password textfield
+              // Password textfield
               MyTextField(
-                controller: passwordController,
+                controller: _passwordController,
                 hintText: 'Password',
                 obscureText: true,
               ),
 
               const SizedBox(height: 10),
 
-              // forgot password?
+              // Forgot password?
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
@@ -91,9 +115,9 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // sign in button
+              // Sign in button
               MyButton(
-                onTap: () => signUserIn(context), // Pass context to navigate
+                onTap: _login, // Call the Firebase sign-in method
               ),
 
               const SizedBox(height: 50),
@@ -128,23 +152,23 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 50),
 
-              // google + apple sign in buttons
+              // Google + Apple sign-in buttons (retain from second code)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  // google button
+                  // Google button
                   SquareTile(imagePath: 'assets/images/google.png'),
 
                   SizedBox(width: 25),
 
-                  // apple button
+                  // Apple button
                   SquareTile(imagePath: 'assets/images/apple.png')
                 ],
               ),
 
               const SizedBox(height: 50),
 
-              // not a member? register now
+              // Not a member? Register now
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -161,7 +185,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
