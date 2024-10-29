@@ -25,12 +25,12 @@ flutter:
   assets:
     - assets/images/
     - assets/logo/
+    - assets/icons/
     - lib/images/
 
   # Uncomment and add your custom fonts here, for example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+     - family: SixtyFour
+       fonts:
+         - asset: assets/fonts/Poppins-Medium.ttf
+

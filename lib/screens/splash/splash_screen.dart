@@ -71,15 +71,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     opacity: isVisible ? 1.0 : 0.0,
                     duration: const Duration(seconds: 1),
                     child: RichText(
-                      text: TextSpan(
-                        style: const TextStyle(
+                      text: const TextSpan(
+                        style: TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w400,
                           color: Colors.white,
                           height: 1.4,
                         ),
                         children: <TextSpan>[
-                          const TextSpan(
+                          TextSpan(
                             text: 'Struggling to keep up ?',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -87,14 +87,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           ),
                           TextSpan(
                             text: ' Discover the learning content ',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                             ),
                           ),
-                          const TextSpan(text: 'for you, '),
+                          TextSpan(text: 'for you, '),
                           TextSpan(
                             text: 'right here !',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.amber, // Highlight color for "right here"
                             ),
