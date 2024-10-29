@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../home/homescreen.dart'; // Import HomeScreen page here
+import 'package:learn_buddy_project/screens/home/homescreen.dart'; // Import HomeScreen page here
 
 import 'package:learn_buddy_project/components/my_button.dart';
 import 'package:learn_buddy_project/components/my_textfield.dart';
@@ -11,6 +11,12 @@ class LoginPage extends StatelessWidget {
   // text editing controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // @override
+  // void dispose(){
+  //   super.dispose();
+  //
+
 
   // sign user in method
   void signUserIn(BuildContext context) {
