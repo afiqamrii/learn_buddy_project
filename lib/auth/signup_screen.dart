@@ -1,11 +1,11 @@
 import 'dart:developer';
-
-import 'package:learn_buddy_project/auth/auth_service.dart';
+import 'package:flutter/material.dart';
+import 'package:learn_buddy_project/auth/auth_service.dart'; // Ensure AuthService is imported
 import 'package:learn_buddy_project/widgets/button.dart';
 import 'package:learn_buddy_project/widgets/textfield.dart';
-import 'package:flutter/material.dart';
-import 'package:learn_buddy_project/auth/login_page.dart';
 import 'package:learn_buddy_project/screens/home/homescreen.dart';
+import 'package:learn_buddy_project/auth/login_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -15,7 +15,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _auth = AuthService();
+  final AuthService _auth = AuthService(); // Initialize AuthService
 
   final _name = TextEditingController();
   final _email = TextEditingController();
@@ -29,6 +29,44 @@ class _SignupScreenState extends State<SignupScreen> {
     _password.dispose();
   }
 
+  // Sign-up method with Firebase
+  Future<void> _signup() async {
+    final user = await _auth.createUserWithEmailAndPassword(
+      _email.text,
+      _password.text,
+    );
+
+    if (user != null) {
+      log("User Created Successfully");
+
+      // Save additional data in Firestore
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'name': _name.text,
+        'email': _email.text,
+        // Add any additional fields you need here
+      });
+
+      goToHome(context);
+    } else {
+      log("Signup Failed");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Signup failed. Please try again.")),
+      );
+    }
+  }
+
+  // Navigate to login screen
+  void goToLogin(BuildContext context) => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const LoginPage()),
+  );
+
+  // Navigate to home screen
+  void goToHome(BuildContext context) => Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => HomeScreen()),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,9 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
             const Spacer(),
             const Text("Signup",
                 style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500)),
-            const SizedBox(
-              height: 50,
-            ),
+            const SizedBox(height: 50),
             CustomTextField(
               hint: "Enter Name",
               label: "Name",
@@ -78,24 +114,5 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
-  }
-
-  goToLogin(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) =>  LoginPage()),
-  );
-
-  goToHome(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => HomeScreen()),
-  );
-
-  _signup() async {
-    final user =
-    await _auth.createUserWithEmailAndPassword(_email.text, _password.text);
-    if (user != null) {
-      log("User Created Succesfully");
-      goToHome(context);
-    }
   }
 }
