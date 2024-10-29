@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../services/api_service.dart';
+import '../../services/date_utils.dart';
+import '../../widgets/nav_item.dart';
+import '../../widgets/search_filters.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -6,83 +10,67 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // Default selected index for Home
-  bool _isSearchBarExpanded = false; // Track search bar position
-  TextEditingController _searchController = TextEditingController();
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  String getGreetingMessage() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return 'Good Morning';
-    } else if (hour < 17) {
-      return 'Good Afternoon';
-    } else {
-      return 'Good Evening';
-    }
-  }
-
-  void _performSearch(String query) {
-    setState(() {
-      _isSearchBarExpanded = true; // Move search bar to the top
-    });
-    print('User searched: $query'); // Perform search functionality here
-  }
+  final ApiService apiService = ApiService();
+  bool _videosSelected = false;
+  bool _readingSelected = false;
+  int _selectedIndex = 0;
+  bool _hasSearched = false;
+  List<Map<String, String>> _results = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 70.0),
-                child: Row(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 60.0),
+            child: Row(
+              children: [
+                const CircleAvatar(
+                  radius: 25,
+                  backgroundImage: AssetImage('assets/images/dummyWallpaper.jpg'),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const CircleAvatar(
-                      radius: 25,
-                      backgroundImage: AssetImage('assets/images/dummyWallpaper.jpg'),
+                    const Text(
+                      'Hi,',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Hello,',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Text(
-                          getGreetingMessage(),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+                    Text(
+                      getGreetingMessage(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[600],
+                      ),
                     ),
-                    const Spacer(),
-                    const Icon(Icons.notifications_active, color: Colors.black, size: 28),
                   ],
                 ),
-              ),
-              Expanded(
-                child: Center(
+                Spacer(),
+                const Icon(Icons.notifications_active, color: Colors.black, size: 28),
+              ],
+            ),
+          ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            top: _hasSearched ? 0 : null,
+            bottom: _hasSearched ? null : 0,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: _hasSearched ? MainAxisAlignment.start : MainAxisAlignment.center,
                       children: [
                         const Text(
                           'Find Your Study Resource',
@@ -112,59 +100,58 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Find Anything Related To Your Study Now!',
                           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                         ),
+                        const SizedBox(height: 30),
+                        SearchFilters(
+                          videosSelected: _videosSelected,
+                          readingSelected: _readingSelected,
+                          onSubmitted: (query) {
+                            search(query);
+                          },
+                          onVideosSelected: (selected) {
+                            setState(() {
+                              _videosSelected = selected;
+                            });
+                          },
+                          onReadingSelected: (selected) {
+                            setState(() {
+                              _readingSelected = selected;
+                            });
+                          },
+                          onBothSelected: (selected) {
+                            setState(() {
+                              _videosSelected = selected;
+                              _readingSelected = selected;
+                            });
+                          },
+                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          // Animated search bar
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            top: _isSearchBarExpanded ? 20 : MediaQuery.of(context).size.height / 2,
-            left: 20,
-            right: 20,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search for topics...',
-                  hintStyle: TextStyle(color: Colors.grey[500]),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                  border: InputBorder.none,
-                  suffixIcon: _isSearchBarExpanded
-                      ? IconButton(
-                    icon: Icon(Icons.close, color: Colors.grey[600]),
-                    onPressed: () {
-                      setState(() {
-                        _isSearchBarExpanded = false;
-                        _searchController.clear();
-                      });
-                    },
-                  )
-                      : null,
-                ),
-                onSubmitted: (query) {
-                  _performSearch(query); // Trigger search
-                },
-              ),
+              ],
             ),
           ),
+          if (_hasSearched)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: _results.isNotEmpty
+                    ? ListView.builder(
+                  itemCount: _results.length,
+                  itemBuilder: (context, index) {
+                    final result = _results[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        title: Text(result['title'] ?? ''),
+                        subtitle: Text(result['url'] ?? ''),
+                      ),
+                    );
+                  },
+                )
+                    : Center(child: Text('No results found')),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: Container(
@@ -183,23 +170,29 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(
-              iconPath: 'assets/icons/home.png', // Dummy path for Home icon
+            NavItem(
+              iconPath: 'assets/icons/home.png',
               selectedIconPath: 'assets/icons/home.png',
               label: 'Home',
               index: 0,
+              isSelected: _selectedIndex == 0,
+              onTap: () => _onItemTapped(0),
             ),
-            _buildNavItem(
-              iconPath: 'assets/icons/love.png', // Dummy path for Favorite icon
+            NavItem(
+              iconPath: 'assets/icons/love.png',
               selectedIconPath: 'assets/icons/love.png',
               label: 'Likes',
               index: 1,
+              isSelected: _selectedIndex == 1,
+              onTap: () => _onItemTapped(1),
             ),
-            _buildNavItem(
-              iconPath: 'assets/icons/profile.png', // Dummy path for Profile icon
+            NavItem(
+              iconPath: 'assets/icons/profile.png',
               selectedIconPath: 'assets/icons/profile.png',
               label: 'Profile',
               index: 2,
+              isSelected: _selectedIndex == 2,
+              onTap: () => _onItemTapped(2),
             ),
           ],
         ),
@@ -207,55 +200,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNavItem({
-    required String iconPath,
-    required String selectedIconPath,
-    required String label,
-    required int index,
-  }) {
-    final bool isSelected = _selectedIndex == index;
+  void search(String query) async {
+    try {
+      List<Map<String, String>> results = [];
+      if (_videosSelected && !_readingSelected) {
+        results = await apiService.fetchYouTubeResults(query);
+      } else if (!_videosSelected && _readingSelected) {
+        results = await apiService.fetchGoogleSearchResults(query);
+      } else if (_videosSelected && _readingSelected) {
+        results.addAll(await apiService.fetchYouTubeResults(query));
+        results.addAll(await apiService.fetchGoogleSearchResults(query));
+      }
+      setState(() {
+        _results = results;
+        _hasSearched = true;
+      });
+    } catch (e) {
+      print('Error fetching results: $e');
+    }
+  }
 
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          key: ValueKey<int>(_selectedIndex),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: isSelected
-                  ? BoxDecoration(
-                color: Colors.pink[100],
-                borderRadius: BorderRadius.circular(20),
-              )
-                  : null,
-              child: Image.asset(
-                isSelected ? selectedIconPath : iconPath,
-                width: 24,
-                height: 24,
-                color: isSelected ? Colors.pink : Colors.grey[600],
-              ),
-            ),
-            if (isSelected) // Only show label if selected
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.pink,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 }

@@ -26,7 +26,6 @@ flutter:
     - assets/images/
     - assets/logo/
     - assets/icons/
-    - lib/images/
 
   # Uncomment and add your custom fonts here, for example:
   fonts:
