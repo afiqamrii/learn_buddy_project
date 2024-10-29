@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "105978585865",
+    "project_id": "learnbuddy-6992d",
+    "storage_bucket": "learnbuddy-6992d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105978585865:android:1de5cc515bccc3468229d8",
+        "android_client_info": {
+          "package_name": "com.example.learn_buddy_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATxVyv8D4uJTl3knF5xZFFY16oZVn3S7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
