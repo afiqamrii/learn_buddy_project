@@ -1,30 +1,59 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:learn_buddy_project/screens/home/homescreen.dart'; // Import HomeScreen page here
-
+import 'package:learn_buddy_project/auth/auth_service.dart';
+import 'package:learn_buddy_project/auth/signup_screen.dart';
+import 'package:learn_buddy_project/screens/home/homescreen.dart';
 import 'package:learn_buddy_project/components/my_button.dart';
 import 'package:learn_buddy_project/components/my_textfield.dart';
 import 'package:learn_buddy_project/components/square_tile.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
-  // text editing controllers
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
 
-  // @override
-  // void dispose(){
-  //   super.dispose();
-  //
+class _LoginPageState extends State<LoginPage> {
+  final AuthService _auth = AuthService();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-  // sign user in method
-  void signUserIn(BuildContext context) {
-    // Navigate to HomeScreen after sign in
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
-    );
+  // Firebase sign-in method
+  void _login() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Check if email and password are entered
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter both email and password")),
+      );
+      return;
+    }
+
+    // Attempt login
+    final user = await _auth.loginUserWithEmailAndPassword(email, password);
+
+    if (user != null) {
+      log("User Logged In");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else {
+      log("Login Failed");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login failed. Please check your credentials.")),
+      );
+    }
   }
 
   @override
@@ -37,131 +66,81 @@ class LoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
-
-              // logo
-              const Icon(
-                Icons.lock,
-                size: 100,
-              ),
-
+              const Icon(Icons.lock, size: 100),
               const SizedBox(height: 50),
-
-              // welcome back, you've been missed!
               Text(
-                'Welcome back you\'ve been missed!',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 16,
-                ),
+                'Welcome back, you\'ve been missed!',
+                style: TextStyle(color: Colors.grey[700], fontSize: 16),
               ),
-
               const SizedBox(height: 25),
-
-              // username textfield
               MyTextField(
-                controller: usernameController,
-                hintText: 'Username',
+                controller: _emailController,
+                hintText: 'Email',
                 obscureText: false,
               ),
-
               const SizedBox(height: 10),
-
-              // password textfield
               MyTextField(
-                controller: passwordController,
+                controller: _passwordController,
                 hintText: 'Password',
                 obscureText: true,
               ),
-
               const SizedBox(height: 10),
-
-              // forgot password?
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
+                    Text('Forgot Password?', style: TextStyle(color: Colors.grey[600])),
                   ],
                 ),
               ),
-
               const SizedBox(height: 25),
-
-              // sign in button
-              MyButton(
-                onTap: () => signUserIn(context), // Pass context to navigate
-              ),
-
+              MyButton(onTap: _login),
               const SizedBox(height: 50),
-
-              // or continue with
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
                   children: [
                     Expanded(
-                      child: Divider(
-                        thickness: 0.5,
-                        color: Colors.grey[400],
-                      ),
+                      child: Divider(thickness: 0.5, color: Colors.grey[400]),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Text(
-                        'Or continue with',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
+                      child: Text('Or continue with', style: TextStyle(color: Colors.grey[700])),
                     ),
                     Expanded(
-                      child: Divider(
-                        thickness: 0.5,
-                        color: Colors.grey[400],
-                      ),
+                      child: Divider(thickness: 0.5, color: Colors.grey[400]),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 50),
-
-              // google + apple sign in buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  // google button
                   SquareTile(imagePath: 'assets/images/google.png'),
-
                   SizedBox(width: 25),
-
-                  // apple button
                   SquareTile(imagePath: 'assets/images/apple.png')
                 ],
               ),
-
               const SizedBox(height: 50),
-
-              // not a member? register now
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Not a member?',
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
+                  Text('Not a member?', style: TextStyle(color: Colors.grey[700])),
                   const SizedBox(width: 4),
-                  const Text(
-                    'Register now',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+                  InkWell(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignupScreen()),
+                    ),
+                    child: const Text(
+                      'Register now',
+                      style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
