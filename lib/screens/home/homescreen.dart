@@ -15,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _readingSelected = false;
   int _selectedIndex = 0;
   bool _hasSearched = false;
-  List<Map<String, String>> _results = [];
+  List<Map<String, dynamic>> _results = []; // Updated type
 
   @override
   Widget build(BuildContext context) {
@@ -142,9 +142,60 @@ class _HomeScreenState extends State<HomeScreen> {
                     final result = _results[index];
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        title: Text(result['title'] ?? ''),
-                        subtitle: Text(result['url'] ?? ''),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          children: [
+                            if (result.containsKey('thumbnail'))
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  result['thumbnail']!,
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.article,
+                                size: 80,
+                                color: Colors.grey[300],
+                              ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    result['title'] ?? 'No Title',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    result['url'] ?? 'No URL',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.blueAccent,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -202,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void search(String query) async {
     try {
-      List<Map<String, String>> results = [];
+      List<Map<String, dynamic>> results = []; // Updated type
       if (_videosSelected && !_readingSelected) {
         results = await apiService.fetchYouTubeResults(query);
       } else if (!_videosSelected && _readingSelected) {

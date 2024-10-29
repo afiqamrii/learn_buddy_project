@@ -2,8 +2,9 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    id "com.google.gms.google-services" // Make sure this is applied
+    id "com.google.gms.google-services" // Ensure this is present
 }
+
 
 android {
     namespace = "com.example.learn_buddy_project"
@@ -21,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.learn_buddy_project"
-        minSdk = flutter.minSdkVersion
+        minSdk = 21 // Ensure this is set to 21 or higher
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
