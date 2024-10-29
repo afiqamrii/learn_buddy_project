@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/api_service.dart';
 import '../../services/date_utils.dart';
 import '../../widgets/nav_item.dart';
@@ -14,8 +15,33 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _videosSelected = false;
   bool _readingSelected = false;
   int _selectedIndex = 0;
-  bool _hasSearched = false;
-  List<Map<String, String>> _results = [];
+  List<Map<String, String>> searchResults = [];
+
+  void search(String query) async {
+    try {
+      List<Map<String, String>> results = [];
+      if (_videosSelected && !_readingSelected) {
+        results = await apiService.fetchYouTubeResults(query);
+      } else if (!_videosSelected && _readingSelected) {
+        results = await apiService.fetchGoogleSearchResults(query);
+      } else if (_videosSelected && _readingSelected) {
+        results = await apiService.fetchYouTubeResults(query) +
+            await apiService.fetchGoogleSearchResults(query);
+      }
+
+      setState(() {
+        searchResults = results;
+      });
+    } catch (e) {
+      print('Error fetching results: $e');
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,100 +84,88 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            top: _hasSearched ? 0 : null,
-            bottom: _hasSearched ? null : 0,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Column(
-                      mainAxisAlignment: _hasSearched ? MainAxisAlignment.start : MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Find Your Study Resource',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Hi, Afiq 👋',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'No More Curiosity!',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                        Text(
-                          'Find Anything Related To Your Study Now!',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 30),
-                        SearchFilters(
-                          videosSelected: _videosSelected,
-                          readingSelected: _readingSelected,
-                          onSubmitted: (query) {
-                            search(query);
-                          },
-                          onVideosSelected: (selected) {
-                            setState(() {
-                              _videosSelected = selected;
-                            });
-                          },
-                          onReadingSelected: (selected) {
-                            setState(() {
-                              _readingSelected = selected;
-                            });
-                          },
-                          onBothSelected: (selected) {
-                            setState(() {
-                              _videosSelected = selected;
-                              _readingSelected = selected;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_hasSearched)
-            Expanded(
+          Expanded(
+            child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: _results.isNotEmpty
-                    ? ListView.builder(
-                  itemCount: _results.length,
-                  itemBuilder: (context, index) {
-                    final result = _results[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        title: Text(result['title'] ?? ''),
-                        subtitle: Text(result['url'] ?? ''),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Find Your Study Resource',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
-                    );
-                  },
-                )
-                    : Center(child: Text('No results found')),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Hi, Afiq 👋',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'No More Curiosity!',
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    ),
+                    Text(
+                      'Find Anything Related To Your Study Now!',
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 30),
+                    SearchFilters(
+                      videosSelected: _videosSelected,
+                      readingSelected: _readingSelected,
+                      onSubmitted: (query) {
+                        search(query);
+                      },
+                      onVideosSelected: (selected) {
+                        setState(() {
+                          _videosSelected = selected;
+                        });
+                      },
+                      onReadingSelected: (selected) {
+                        setState(() {
+                          _readingSelected = selected;
+                        });
+                      },
+                      onBothSelected: (selected) {
+                        setState(() {
+                          _videosSelected = selected;
+                          _readingSelected = selected;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
+          ),
+          Expanded(
+            child: searchResults.isEmpty
+                ? Center(child: Text('No results found'))
+                : ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              itemCount: searchResults.length,
+              itemBuilder: (context, index) {
+                final result = searchResults[index];
+                return ResultCard(
+                  title: result['title'] ?? 'No Title',
+                  description: result['description'] ?? 'No Description',
+                  url: result['url'] ?? '',
+                  source: result['source'] ?? 'Unknown Source',
+                  thumbnailUrl: result['thumbnail'] ?? '',
+                );
+              },
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: Container(
@@ -199,30 +213,113 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  void search(String query) async {
-    try {
-      List<Map<String, String>> results = [];
-      if (_videosSelected && !_readingSelected) {
-        results = await apiService.fetchYouTubeResults(query);
-      } else if (!_videosSelected && _readingSelected) {
-        results = await apiService.fetchGoogleSearchResults(query);
-      } else if (_videosSelected && _readingSelected) {
-        results.addAll(await apiService.fetchYouTubeResults(query));
-        results.addAll(await apiService.fetchGoogleSearchResults(query));
-      }
-      setState(() {
-        _results = results;
-        _hasSearched = true;
-      });
-    } catch (e) {
-      print('Error fetching results: $e');
+// Define the ResultCard widget here
+class ResultCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final String url;
+  final String source;
+  final String thumbnailUrl;
+
+  const ResultCard({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.url,
+    required this.source,
+    required this.thumbnailUrl,
+  }) : super(key: key);
+
+  void _launchURL() async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blueAccent.shade100,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 3,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (thumbnailUrl.isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                thumbnailUrl,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  source,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: ElevatedButton(
+                    onPressed: _launchURL,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.blueAccent, backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text('View More'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
