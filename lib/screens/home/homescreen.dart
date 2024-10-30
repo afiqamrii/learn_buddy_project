@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/api_service.dart';
 import '../../services/date_utils.dart';
 import '../../widgets/nav_item.dart';
+import '../../widgets/result_card.dart';
 import '../../widgets/search_filters.dart';
+import '../favorite/favorite_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -14,31 +17,89 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _videosSelected = false;
   bool _readingSelected = false;
   int _selectedIndex = 0;
-  bool _hasSearched = false;
-  List<Map<String, dynamic>> _results = []; // Updated type
+  List<Map<String, String>> searchResults = [];
+  List<Map<String, String>> favoriteResults = [];
+
+  void search(String query) async {
+    try {
+      List<Map<String, String>> results = [];
+      if (_videosSelected && !_readingSelected) {
+        results = await apiService.fetchYouTubeResults(query);
+      } else if (!_videosSelected && _readingSelected) {
+        results = await apiService.fetchGoogleSearchResults(query);
+      } else if (_videosSelected && _readingSelected) {
+        results = await apiService.fetchYouTubeResults(query) +
+            await apiService.fetchGoogleSearchResults(query);
+      }
+
+      setState(() {
+        searchResults = results;
+      });
+    } catch (e) {
+      print('Error fetching results: $e');
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void toggleFavorite(Map<String, String> result) {
+    setState(() {
+      if (favoriteResults.contains(result)) {
+        favoriteResults.remove(result);
+      } else {
+        favoriteResults.add(result);
+      }
+    });
+  }
+
+  Widget buildSearchResults() {
+    return searchResults.isEmpty
+        ? Center(child: Text('No results found'))
+        : ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      itemCount: searchResults.length,
+      itemBuilder: (context, index) {
+        final result = searchResults[index];
+        return ResultCard(
+          title: result['title'] ?? 'No Title',
+          description: result['description'] ?? 'No Description',
+          url: result['url'] ?? '',
+          source: result['source'] ?? 'Unknown Source',
+          thumbnailUrl: result['thumbnail'] ?? '',
+          isFavorite: favoriteResults.contains(result),
+          onFavoriteToggle: () => toggleFavorite(result),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: _selectedIndex == 0
+          ? Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 60.0),
             child: Row(
               children: [
                 const CircleAvatar(
-                  radius: 25,
+                  radius: 20,
                   backgroundImage: AssetImage('assets/images/dummyWallpaper.jpg'),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Hi,',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
@@ -46,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       getGreetingMessage(),
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w400,
                         color: Colors.grey[600],
                       ),
@@ -54,156 +115,78 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 Spacer(),
-                const Icon(Icons.notifications_active, color: Colors.black, size: 28),
+                const Icon(Icons.notifications_active, color: Colors.black, size: 24),
               ],
             ),
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            top: _hasSearched ? 0 : null,
-            bottom: _hasSearched ? null : 0,
-            left: 0,
-            right: 0,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Column(
-                      mainAxisAlignment: _hasSearched ? MainAxisAlignment.start : MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Find Your Study Resource',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Hi, Afiq 👋',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'No More Curiosity!',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                        Text(
-                          'Find Anything Related To Your Study Now!',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 30),
-                        SearchFilters(
-                          videosSelected: _videosSelected,
-                          readingSelected: _readingSelected,
-                          onSubmitted: (query) {
-                            search(query);
-                          },
-                          onVideosSelected: (selected) {
-                            setState(() {
-                              _videosSelected = selected;
-                            });
-                          },
-                          onReadingSelected: (selected) {
-                            setState(() {
-                              _readingSelected = selected;
-                            });
-                          },
-                          onBothSelected: (selected) {
-                            setState(() {
-                              _videosSelected = selected;
-                              _readingSelected = selected;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+                const Text(
+                  'Find Your Study Resource',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Hi, Afiq 👋',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'No More Curiosity!',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                Text(
+                  'Find Anything Related To Your Study Now!',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 10),
+                SearchFilters(
+                  videosSelected: _videosSelected,
+                  readingSelected: _readingSelected,
+                  onSubmitted: (query) {
+                    search(query);
+                  },
+                  onVideosSelected: (selected) {
+                    setState(() {
+                      _videosSelected = selected;
+                    });
+                  },
+                  onReadingSelected: (selected) {
+                    setState(() {
+                      _readingSelected = selected;
+                    });
+                  },
+                  onBothSelected: (selected) {
+                    setState(() {
+                      _videosSelected = selected;
+                      _readingSelected = selected;
+                    });
+                  },
                 ),
               ],
             ),
           ),
-          if (_hasSearched)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: _results.isNotEmpty
-                    ? ListView.builder(
-                  itemCount: _results.length,
-                  itemBuilder: (context, index) {
-                    final result = _results[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          children: [
-                            if (result.containsKey('thumbnail'))
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.network(
-                                  result['thumbnail']!,
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            else
-                              Icon(
-                                Icons.article,
-                                size: 80,
-                                color: Colors.grey[300],
-                              ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    result['title'] ?? 'No Title',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    result['url'] ?? 'No URL',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.blueAccent,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                )
-                    : Center(child: Text('No results found')),
-              ),
-            ),
+          Expanded(
+            child: buildSearchResults(),
+          ),
         ],
+      )
+          : FavoritesScreen(
+        favoriteResults: favoriteResults,
+        onFavoriteToggle: toggleFavorite, // Pass toggleFavorite as a callback
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -232,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
             NavItem(
               iconPath: 'assets/icons/love.png',
               selectedIconPath: 'assets/icons/love.png',
-              label: 'Likes',
+              label: 'Favorites',
               index: 1,
               isSelected: _selectedIndex == 1,
               onTap: () => _onItemTapped(1),
@@ -249,31 +232,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  void search(String query) async {
-    try {
-      List<Map<String, dynamic>> results = []; // Updated type
-      if (_videosSelected && !_readingSelected) {
-        results = await apiService.fetchYouTubeResults(query);
-      } else if (!_videosSelected && _readingSelected) {
-        results = await apiService.fetchGoogleSearchResults(query);
-      } else if (_videosSelected && _readingSelected) {
-        results.addAll(await apiService.fetchYouTubeResults(query));
-        results.addAll(await apiService.fetchGoogleSearchResults(query));
-      }
-      setState(() {
-        _results = results;
-        _hasSearched = true;
-      });
-    } catch (e) {
-      print('Error fetching results: $e');
-    }
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 }

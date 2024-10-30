@@ -16,17 +16,17 @@ class FavoritesScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Remove from Favorites"),
-          content: const Text("Are you sure you want to remove this item from your favorites ?"),
+          title: Text("Remove from Favorites"),
+          content: Text("Are you sure you want to remove this item from your favorites?"),
           actions: [
             TextButton(
-              child: const Text("Cancel"),
+              child: Text("Cancel"),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog without removing
               },
             ),
             TextButton(
-              child: const Text("Remove"),
+              child: Text("Remove"),
               onPressed: () {
                 onFavoriteToggle(result); // Remove the item from favorites
                 Navigator.of(context).pop(); // Close the dialog after removing
@@ -60,7 +60,7 @@ class FavoritesScreen extends StatelessWidget {
           // Display either favorite items or a placeholder message
           Expanded(
             child: favoriteResults.isEmpty
-                ? const Center(child: Text('No favorites yet'))
+                ? Center(child: Text('No favorites yet'))
                 : ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: favoriteResults.length,
