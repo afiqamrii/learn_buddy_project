@@ -6,6 +6,7 @@ import 'package:learn_buddy_project/screens/home/homescreen.dart';
 import 'package:learn_buddy_project/components/my_button.dart';
 import 'package:learn_buddy_project/components/my_textfield.dart';
 import 'package:learn_buddy_project/components/square_tile.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -65,9 +66,13 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-              const Icon(Icons.lock, size: 100),
-              const SizedBox(height: 50),
+              const SizedBox(height: 10),
+              // Replacing the lock icon with your SVG image
+              SvgPicture.asset(
+                'assets/logo/lb_logo_pic.svg',
+                height: 200, // adjust size as needed
+              ),
+              const SizedBox(height: 10),
               Text(
                 'Welcome back, you\'ve been missed!',
                 style: TextStyle(color: Colors.grey[700], fontSize: 16),
@@ -115,14 +120,14 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 50),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  SquareTile(imagePath: 'assets/images/google.png'),
-                  SizedBox(width: 25),
-                  SquareTile(imagePath: 'assets/images/apple.png')
-                ],
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: const [
+              //     SquareTile(imagePath: 'assets/images/google.png'),
+              //     SizedBox(width: 25),
+              //     SquareTile(imagePath: 'assets/images/apple.png')
+              //   ],
+              // ),
               const SizedBox(height: 50),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

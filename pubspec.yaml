@@ -22,7 +22,7 @@ dependencies:
   cloud_firestore: ^4.16.1
 #  google_sign_in: ^5.4.2
   firebase_storage: ^11.7.1
-#  image_picker: ^0.8.6+1
+  image_picker: ^0.8.6+1
 
 dev_dependencies:
   flutter_test:
@@ -36,6 +36,7 @@ flutter:
     - assets/images/
     - assets/logo/
     - assets/icons/
+    - assets/logo/lb_logo_pic.svg
 
   # Uncomment and add your custom fonts here, for example:
   fonts:
