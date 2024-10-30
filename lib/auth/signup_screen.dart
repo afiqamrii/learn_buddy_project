@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:learn_buddy_project/auth/auth_service.dart'; // Import AuthService
+import 'package:learn_buddy_project/auth/auth_service.dart';
 import 'package:learn_buddy_project/widgets/button.dart';
 import 'package:learn_buddy_project/widgets/textfield.dart';
 import 'package:learn_buddy_project/screens/home/homescreen.dart';
@@ -28,7 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _password.dispose();
   }
 
-  // Sign-up method with Firebase
+  // Sign-up method with Firebase and save to Firestore
   Future<void> _signup() async {
     final user = await _auth.createUserWithEmailAndPassword(
       _email.text,

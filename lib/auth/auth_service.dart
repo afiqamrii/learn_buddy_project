@@ -53,7 +53,9 @@ class AuthService {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
-        await user.updateEmail(email);
+        // Send verification email before updating
+        await user.verifyBeforeUpdateEmail(email);
+        // Update password
         await user.updatePassword(password);
       }
     } catch (e) {

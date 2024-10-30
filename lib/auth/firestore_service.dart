@@ -16,6 +16,8 @@ class FirestoreService {
     return null;
   }
 
+
+
   // Update user profile in Firestore and Firebase Auth
   Future<void> updateUserProfile(String name, String email, String password) async {
     User? currentUser = _firebaseAuth.currentUser;

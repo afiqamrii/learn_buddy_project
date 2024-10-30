@@ -44,6 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String updatedEmail = _emailController.text;
       String password = _passwordController.text;
 
+      // Ensure the password is provided for updates
       if (password.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password is required for updating profile')),
@@ -58,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully')));
     } catch (e) {
       // Handle the error (e.g., show an error message)
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile: ${e.toString()}')));
     }
   }
 
