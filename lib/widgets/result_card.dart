@@ -22,7 +22,7 @@ class ResultCard extends StatelessWidget {
   }) : super(key: key);
 
   Future<void> _launchUrl() async {
-    final uri = Uri.tryParse(url); // Try parsing the URL to handle errors gracefully
+    final uri = Uri.tryParse(url);
     if (uri != null) {
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         throw Exception('Could not launch $url');
@@ -69,12 +69,18 @@ class ResultCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 220,
+                      ),
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        softWrap: true,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -116,8 +122,8 @@ class ResultCard extends StatelessWidget {
             ],
           ),
           Positioned(
-            top: 8,
-            right: 8,
+            top: -10,
+            right: -10,
             child: IconButton(
               icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
               color: isFavorite ? Colors.pink : Colors.white,

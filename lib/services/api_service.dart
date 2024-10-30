@@ -7,7 +7,7 @@ class ApiService {
   static const String _youtubeApiKey = 'AIzaSyAoVcOgPUBePXe2cUA6yPjKkV-TVRYqJac';
   static const String _searchEngineId = '76379b7aebfc34e5a';
 
-  // Fetch YouTube results with thumbnails
+  // Fetch YouTube results with thumbnails, description, and source
   Future<List<Map<String, String>>> fetchYouTubeResults(String query) async {
     final url = Uri.parse(
       'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=$query&key=$_youtubeApiKey',
@@ -22,6 +22,8 @@ class ApiService {
           'title': item['snippet']['title'],
           'url': 'https://www.youtube.com/watch?v=${item['id']['videoId']}',
           'thumbnail': item['snippet']['thumbnails']['medium']['url'],
+          'description': item['snippet']['description'] ?? 'No description',
+          'source': 'YouTube',
         });
       }
       return results;
@@ -30,7 +32,7 @@ class ApiService {
     }
   }
 
-  // Fetch Google Search results
+  // Fetch Google Search results with description and source
   Future<List<Map<String, String>>> fetchGoogleSearchResults(String query) async {
     final url = Uri.parse(
       'https://www.googleapis.com/customsearch/v1?key=$_googleApiKey&cx=$_searchEngineId&q=$query',
@@ -44,6 +46,9 @@ class ApiService {
         results.add({
           'title': item['title'],
           'url': item['link'],
+          'thumbnail': item['pagemap']?['cse_thumbnail']?[0]?['src'] ?? '',
+          'description': item['snippet'] ?? 'No description',
+          'source': 'Google',
         });
       }
       return results;

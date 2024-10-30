@@ -18,10 +18,37 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _videosSelected = false;
   bool _readingSelected = false;
   int _selectedIndex = 0;
+  int _currentPage = 1;
+  bool _isLoadingMore = false;
   List<Map<String, String>> searchResults = [];
   List<Map<String, String>> favoriteResults = [];
+  ScrollController _scrollController = ScrollController();
 
-  void search(String query) async {
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void search(String query, {bool isLoadMore = false}) async {
+    if (isLoadMore) {
+      setState(() {
+        _isLoadingMore = true;
+      });
+      _currentPage++;
+    } else {
+      setState(() {
+        _currentPage = 1;
+        searchResults.clear();
+      });
+    }
+
     try {
       List<Map<String, String>> results = [];
       if (_videosSelected && !_readingSelected) {
@@ -33,10 +60,21 @@ class _HomeScreenState extends State<HomeScreen> {
             await apiService.fetchGoogleSearchResults(query);
       }
       setState(() {
-        searchResults = results;
+        searchResults.addAll(results); // Append new results to the list
+        _isLoadingMore = false;
       });
     } catch (e) {
       print('Error fetching results: $e');
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore) {
+      // Trigger load more
+      search("current query", isLoadMore: true);
     }
   }
 
@@ -60,9 +98,21 @@ class _HomeScreenState extends State<HomeScreen> {
     return searchResults.isEmpty
         ? Center(child: Text('No results found'))
         : ListView.builder(
+      controller: _scrollController,
       padding: EdgeInsets.symmetric(horizontal: 16),
-      itemCount: searchResults.length,
+      itemCount: searchResults.length + 1, // Extra item for the Load More button
       itemBuilder: (context, index) {
+        if (index == searchResults.length) {
+          // Load More button at the end of the list
+          return _isLoadingMore
+              ? Center(child: CircularProgressIndicator())
+              : TextButton(
+            onPressed: () {
+              search("current query", isLoadMore: true);
+            },
+            child: Text("Load More"),
+          );
+        }
         final result = searchResults[index];
         return ResultCard(
           title: result['title'] ?? 'No Title',
