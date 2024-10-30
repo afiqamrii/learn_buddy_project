@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // API keys and Search Engine ID
   static const String _googleApiKey = 'AIzaSyC1cKhEFEJXljaVJD8olLd3bGJAV1zLFwk';
-  static const String _youtubeApiKey = 'AIzaSyAu2l37PJ_FNLJd7dB99JMeuJFGgNzDw2I';
+  static const String _youtubeApiKey = 'AIzaSyAoVcOgPUBePXe2cUA6yPjKkV-TVRYqJac';
   static const String _searchEngineId = '76379b7aebfc34e5a';
 
   // Fetch YouTube results with thumbnails
