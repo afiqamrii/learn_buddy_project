@@ -3,6 +3,11 @@ import '../../auth/firestore_service.dart';
 import '../../auth/auth_service.dart'; // Import AuthService
 
 class ProfileScreen extends StatefulWidget {
+
+  final Function(String) onProfileUpdated; // Add this line
+
+  ProfileScreen({required this.onProfileUpdated}); // Update constructor
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
@@ -21,13 +26,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
-    var profileData = await _firestoreService.getUserProfile();
-    if (profileData != null) {
-      setState(() {
-        _nameController.text = profileData['name'] ?? '';
-        _emailController.text = profileData['email'] ?? '';
-      });
-    }
+      var profileData = await _firestoreService.getUserProfile();
+      if (profileData != null) {
+        setState(() {
+          _nameController.text = profileData['name'] ?? '';
+          _emailController.text = profileData['email'] ?? '';
+        });
+      }
+
   }
 
   @override
@@ -54,6 +60,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Update Firestore and Firebase Auth
       await _firestoreService.updateUserProfile(updatedName, updatedEmail, password);
+
+      // Call the callback function to notify HomeScreen of the update
+      widget.onProfileUpdated(updatedName); // Add this line
 
       // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully')));

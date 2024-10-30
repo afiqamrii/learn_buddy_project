@@ -3,6 +3,8 @@ import 'package:learn_buddy_project/screens/home/profile_screen.dart';
 import 'package:learn_buddy_project/screens/profile_page/profile_page.dart';
 import '../../services/api_service.dart';
 import '../../services/date_utils.dart';
+import '../../auth/firestore_service.dart'; // Import FirestoreService
+import '../../auth/auth_service.dart'; // Import AuthService
 import '../../widgets/nav_item.dart';
 import '../../widgets/result_card.dart';
 import '../../widgets/search_filters.dart';
@@ -15,40 +17,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ApiService apiService = ApiService();
+  final FirestoreService firestoreService = FirestoreService(); // FirestoreService instance
+  final AuthService authService = AuthService(); // AuthService instance
   bool _videosSelected = false;
   bool _readingSelected = false;
   int _selectedIndex = 0;
-  int _currentPage = 1;
-  bool _isLoadingMore = false;
   List<Map<String, String>> searchResults = [];
   List<Map<String, String>> favoriteResults = [];
-  ScrollController _scrollController = ScrollController();
+  String? userName; // Variable to hold user's name
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _loadUserData(); // Load user data when the screen initializes
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void search(String query, {bool isLoadMore = false}) async {
-    if (isLoadMore) {
+  Future<void> _loadUserData() async {
+    var userData = await firestoreService.getUserProfile(); // Fetch user profile
+    if (userData != null) {
       setState(() {
-        _isLoadingMore = true;
-      });
-      _currentPage++;
-    } else {
-      setState(() {
-        _currentPage = 1;
-        searchResults.clear();
+        userName = userData['name']; // Assuming 'name' is a field in Firestore
       });
     }
+  }
 
+  void search(String query) async {
     try {
       List<Map<String, String>> results = [];
       if (_videosSelected && !_readingSelected) {
@@ -60,21 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
             await apiService.fetchGoogleSearchResults(query);
       }
       setState(() {
-        searchResults.addAll(results); // Append new results to the list
-        _isLoadingMore = false;
+        searchResults = results;
       });
     } catch (e) {
       print('Error fetching results: $e');
-      setState(() {
-        _isLoadingMore = false;
-      });
-    }
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore) {
-      // Trigger load more
-      search("current query", isLoadMore: true);
     }
   }
 
@@ -98,21 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return searchResults.isEmpty
         ? Center(child: Text('No results found'))
         : ListView.builder(
-      controller: _scrollController,
       padding: EdgeInsets.symmetric(horizontal: 16),
-      itemCount: searchResults.length + 1, // Extra item for the Load More button
+      itemCount: searchResults.length,
       itemBuilder: (context, index) {
-        if (index == searchResults.length) {
-          // Load More button at the end of the list
-          return _isLoadingMore
-              ? Center(child: CircularProgressIndicator())
-              : TextButton(
-            onPressed: () {
-              search("current query", isLoadMore: true);
-            },
-            child: Text("Load More"),
-          );
-        }
         final result = searchResults[index];
         return ResultCard(
           title: result['title'] ?? 'No Title',
@@ -138,7 +108,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => ProfileScreen(
+                        onProfileUpdated: (updatedName) {
+                          setState(() {
+                            userName = updatedName; // Update the userName in HomeScreen
+                          });
+                        },
+                      ),
+                    ),
                   );
                 },
                 child: const CircleAvatar(
@@ -159,11 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    getGreetingMessage(),
-                    style: TextStyle(
+                    userName != null ? getGreetingMessage() : 'Loading...', // Correct usage
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: Colors.grey[600],
+                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -187,17 +165,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 6),
               Text(
-                'Hi, Afiq 👋',
-                textAlign: TextAlign.center,
+                userName != null ? 'Hi, $userName 👋' : 'Loading...',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   color: Colors.grey[700],
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 'No More Curiosity!',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
