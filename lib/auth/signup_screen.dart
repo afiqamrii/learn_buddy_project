@@ -1,11 +1,10 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:learn_buddy_project/auth/auth_service.dart'; // Ensure AuthService is imported
+import 'package:learn_buddy_project/auth/auth_service.dart'; // Import AuthService
 import 'package:learn_buddy_project/widgets/button.dart';
 import 'package:learn_buddy_project/widgets/textfield.dart';
 import 'package:learn_buddy_project/screens/home/homescreen.dart';
 import 'package:learn_buddy_project/auth/login_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -34,18 +33,13 @@ class _SignupScreenState extends State<SignupScreen> {
     final user = await _auth.createUserWithEmailAndPassword(
       _email.text,
       _password.text,
+      _name.text, // Pass name to AuthService to save in Firestore
     );
 
     if (user != null) {
       log("User Created Successfully");
 
-      // Save additional data in Firestore
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'name': _name.text,
-        'email': _email.text,
-        // Add any additional fields you need here
-      });
-
+      // Navigate to Home Screen
       goToHome(context);
     } else {
       log("Signup Failed");

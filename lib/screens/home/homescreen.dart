@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learn_buddy_project/screens/home/profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/api_service.dart';
 import '../../services/date_utils.dart';
@@ -88,9 +89,18 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 60.0),
             child: Row(
               children: [
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: AssetImage('assets/images/dummyWallpaper.jpg'),
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to the ProfileScreen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileScreen()),
+                    );
+                  },
+                  child: const CircleAvatar(
+                    radius: 25,
+                    backgroundImage: AssetImage('assets/images/dummyWallpaper.jpg'),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Column(

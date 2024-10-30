@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../auth/firestore_service.dart'; // Import your FirestoreService
+import '../../auth/firestore_service.dart';
+import '../../auth/auth_service.dart'; // Import AuthService
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController(); // Password controller
   final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _authService = AuthService(); // AuthService instance
 
   @override
   void initState() {
@@ -49,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-      // Call the Firestore service to update the profile
+      // Update Firestore and Firebase Auth
       await _firestoreService.updateUserProfile(updatedName, updatedEmail, password);
 
       // Show a success message
