@@ -9,14 +9,14 @@ class SearchFilters extends StatelessWidget {
   final Function(bool) onBothSelected;
 
   const SearchFilters({
-    Key? key,
+    super.key,
     required this.videosSelected,
     required this.readingSelected,
     required this.onSubmitted,
     required this.onVideosSelected,
     required this.onReadingSelected,
     required this.onBothSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,7 @@ class SearchFilters extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ChoiceChip(
-              label: Text("Videos", style: TextStyle(fontSize: 14)),
+              label: const Text("Videos", style: TextStyle(fontSize: 14)),
               selected: videosSelected,
               onSelected: onVideosSelected,
               selectedColor: Colors.blueAccent.withOpacity(0.2),
@@ -59,7 +59,7 @@ class SearchFilters extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             ChoiceChip(
-              label: Text("Reading", style: TextStyle(fontSize: 14)),
+              label: const Text("Reading", style: TextStyle(fontSize: 14)),
               selected: readingSelected,
               onSelected: onReadingSelected,
               selectedColor: Colors.blueAccent.withOpacity(0.2),
@@ -67,7 +67,7 @@ class SearchFilters extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             ChoiceChip(
-              label: Text("Both", style: TextStyle(fontSize: 14)),
+              label: const Text("Both", style: TextStyle(fontSize: 14)),
               selected: videosSelected && readingSelected,
               onSelected: onBothSelected,
               selectedColor: Colors.blueAccent.withOpacity(0.2),
